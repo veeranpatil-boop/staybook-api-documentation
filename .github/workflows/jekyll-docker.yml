@@ -1,20 +1,52 @@
-name: Jekyll site CI
+name: Deploy Jekyll site to Pages 
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+push:
+branches: [ "main" ]
+workflow_dispatch: # Allows you to manually trigger the build from the Actions tab 
+
+### Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+
+permissions:
+contents: read
+pages: write
+id-token: write 
+
+### Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+
+concurrency:
+group: "pages"
+cancel-in-progress: false 
 
 jobs:
-  build:
+build:
+runs-on: ubuntu-latest
+steps:
+- name: Checkout repository
+uses: actions/checkout@v4 
 
-    runs-on: ubuntu-latest
+* name: Setup Pages
+uses: actions/configure-pages@v4
+* name: Setup Ruby
+uses: ruby/setup-ruby@v1
+with:
+ruby-version: '3.2'
+bundler-cache: true # Caches gems for fast builds
+cache-version: 1 # Increment this number to force a fresh cache
+* name: Build with Jekyll
+run: bundle exec jekyll build --future
+env:
+JEKYLL_ENV: production
+* name: Upload artifact
+uses: actions/upload-pages-artifact@v3
 
-    steps:
-    - uses: actions/checkout@v4
-    - name: Build the site in the jekyll/builder container
-      run: |
-        docker run \
-        -v ${{ github.workspace }}:/srv/jekyll -v ${{ github.workspace }}/_site:/srv/jekyll/_site \
-        jekyll/builder:latest /bin/bash -c "chmod -R 777 /srv/jekyll && jekyll build --future"
+deploy:
+environment:
+name: github-pages
+url: ${{ steps:deployment.outputs.page_url }}
+runs-on: ubuntu-latest
+needs: build
+steps:
+- name: Deploy to GitHub Pages
+id: deployment
+uses: actions/deploy-pages@v4
