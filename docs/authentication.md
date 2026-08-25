@@ -54,4 +54,4 @@ Access tokens expire after 1 hour. Request a new token when you receive a `401` 
 | `reservations:read` | List and retrieve reservations |
 | `reservations:write` | Create, modify, and cancel reservations |
 
-*Note* Request only the scopes your integration needs.
+*Note* : Request only the scopes your integration needs.
