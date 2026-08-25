@@ -1,11 +1,10 @@
 # Authentication
 
-StayBook supports two authentication methods. Which one you use depends on what
-you're building.
+StayBook offers two authentication methods. The one you use depends on what you're building.
 
 | Method | Use when | Header/flow |
 |---|---|---|
-| API key | Your own server integrates directly with one StayBook account | `X-API-Key` header |
+| API key | Your own server connects directly to a single StayBook account | `X-API-Key` header |
 | OAuth2 client credentials | You're a partner platform acting on behalf of multiple properties | Bearer token from `/oauth/token` |
 
 ## API keys
@@ -22,17 +21,14 @@ curl https://api.staybook.dev/v1/properties \
   -H "X-API-Key: sk_live_xxx"
 ```
 
-Treat API keys as secrets. Don't commit them to source control or expose them in
-client-side code — a leaked key gives full read/write access to reservations and
-guest data on that account.
+Treat API keys like passwords. Don't commit them to source control or expose them in client-side code. A leaked key can give someone full access to the account's reservations and guest data.
 
 ## OAuth2 client credentials
 
-Partner applications that act on behalf of multiple StayBook properties authenticate
-with OAuth2's client credentials grant instead of a single API key.
+Partner applications that work with multiple StayBook properties use OAuth 2.0 client credentials instead of a single API key.
 
-1. Register your application to receive a `client_id` and `client_secret`.
-2. Exchange them for an access token:
+1. Register your application to get a `client_id` and `client_secret`.
+2. Use them for an access token:
 
    ```bash
    curl -X POST https://auth.staybook.dev/oauth/token \
@@ -49,8 +45,7 @@ with OAuth2's client credentials grant instead of a single API key.
      -H "Authorization: Bearer ACCESS_TOKEN"
    ```
 
-Access tokens expire after 1 hour. Request a new one when you receive a `401` with
-error code `token_expired` — don't cache tokens indefinitely.
+Access tokens expire after 1 hour. Request a new token when you receive a `401` error with the `token_expired` code. Don't cache tokens indefinitely.
 
 ### Scopes
 
