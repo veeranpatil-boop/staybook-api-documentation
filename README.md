@@ -1,11 +1,8 @@
 # StayBook API Documentation
 
-Sample API documentation portfolio project — a fictional hotel booking/reservations
-API, documented end to end: OpenAPI reference, conceptual guides, and an automated
-publishing pipeline.
+Sample API documentation portfolio project for a fictional hotel booking and reservations API. The project includes end-to-end documentation, including an OpenAPI reference, conceptual guides, and an automated publishing pipeline.
 
-**This is a documentation writing sample.** The API itself doesn't exist; there's no
-live server behind these examples.
+**This is a documentation writing sample.** The API is fictional, and there is no live server behind the examples.
 
 ## What's here
 
