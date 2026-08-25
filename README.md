@@ -18,11 +18,13 @@ Sample API documentation portfolio project for a fictional hotel booking and res
 
 ## Why this project
 
-Most sample API docs are just an OpenAPI file. This one is built the way a real
-developer-docs site is: reference documentation generated from the spec, sitting
-alongside hand-written conceptual guides that a spec can't express on its own —
-*why* cursors instead of page numbers, *how* to verify a webhook signature, *what*
-to do when a request times out and you're not sure whether it succeeded.
+Most sample API documentation includes only an OpenAPI file. This project is structured more like a real developer documentation site.
+
+The API reference is generated from the OpenAPI specification and is supported by hand-written conceptual guides that explain information a specification alone cannot cover, such as:
+- Why the API uses cursors instead of page numbers.
+- How to verify a webhook signature.
+- What to do when a request times out and you're not sure whether it succeeded.
+
 
 ## Design decisions worth noting
 
