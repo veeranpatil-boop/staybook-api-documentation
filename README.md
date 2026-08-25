@@ -28,16 +28,10 @@ The API reference is generated from the OpenAPI specification and is supported b
 
 ## Design decisions worth noting
 
-- **Cursor pagination over offset/page numbers** — documented with the reasoning,
-  not just the mechanics, in [`docs/pagination.md`](docs/pagination.md).
-- **Two auth schemes** (API key + OAuth2 client credentials) to reflect a real
-  split between direct integrators and partner platforms.
-- **A `409 Conflict` on booking creation** — modeling the real-world race condition
-  where two people try to book the last room at once, and documenting it as an
-  expected, handleable response rather than an edge case.
-- **Webhook signature verification with sample code**, because "verify the
-  signature" without a snippet is advice nobody follows.
-
+- **Cursor pagination instead of offset or page numbers** - The documentation explains the reasoning behind this approach, not just how to use it.
+- **Two authentication methods** - API keys for direct integrations and OAuth 2.0 client credentials for partner applications.
+- **A `409 Conflict` on booking creation** — Models the real-world situation where two people try to book the last available room at the same time. The documentation treats this as an expected error that developers can handle, rather than an edge case.
+- **Webhook signature verification with sample code** - Includes a practical example because instructions to "verify the signature" are much more useful when developers can see how to implement it.
 ## Building the docs locally
 
 ```bash
