@@ -27,7 +27,8 @@ theme:
     - search.highlight
 
 nav:
-  - Home: getting-started.md
+  - Home: index.md
+  - Getting Started: getting-started.md
   - Authentication: authentication.md
   - Pagination: pagination.md
   - Rate Limiting: rate-limiting.md
