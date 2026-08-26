@@ -1,0 +1,45 @@
+site_name: StayBook API Documentation
+site_url: https://veeranpatil-boop.github.io/staybook-api-documentation/
+repo_url: https://github.com/veeranpatil-boop/staybook-api-documentation
+repo_name: staybook-api-documentation
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - toc.integrate
+    - content.code.copy
+    - content.code.annotate
+    - search.suggest
+    - search.highlight
+
+nav:
+  - Home: getting-started.md
+  - Authentication: authentication.md
+  - Pagination: pagination.md
+  - Rate Limiting: rate-limiting.md
+  - Errors: errors.md
+  - Webhooks: webhooks.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
