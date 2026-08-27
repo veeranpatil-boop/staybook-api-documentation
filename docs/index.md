@@ -1,4 +1,4 @@
-# StayBook API Documentation
+<img width="1407" height="607" alt="image" src="https://github.com/user-attachments/assets/a60d462a-f592-4a7e-a506-280d5ccf8a90" /># StayBook API Documentation
 
 Sample API documentation portfolio project for a fictional hotel booking and reservations API. The project includes end-to-end documentation, including an OpenAPI reference, conceptual guides, and an automated publishing pipeline.
 
@@ -8,13 +8,13 @@ Sample API documentation portfolio project for a fictional hotel booking and res
 
 | Path | Contents |
 |---|---|
-| [`openapi/openapi.yaml`](openapi/openapi.yaml) | Full OpenAPI 3.1 spec — 7 resources, two auth schemes, cursor pagination, structured errors |
-| [`docs/getting-started.md`](docs/getting-started.md) | First integration, start to finish |
-| [`docs/authentication.md`](docs/authentication.md) | API keys vs. OAuth2 client credentials |
-| [`docs/pagination.md`](docs/pagination.md) | Cursor-based pagination |
-| [`docs/errors.md`](docs/errors.md) | Error shape and common error codes |
-| [`docs/rate-limiting.md`](docs/rate-limiting.md) | Limits, headers, backoff |
-| [`docs/webhooks.md`](docs/webhooks.md) | Event subscriptions, signature verification, retries |
+| [`openapi.yaml`](../openapi/openapi.yaml) | Full OpenAPI 3.1 spec — 7 resources, two auth schemes, cursor pagination, structured errors |
+| [`getting-started.md`](getting-started.md) | First integration, start to finish |
+| [`authentication.md`](authentication.md) | API keys vs. OAuth2 client credentials |
+| [`pagination.md`](pagination.md) | Cursor-based pagination |
+| [`errors.md`](errors.md) | Error shape and common error codes |
+| [`rate-limiting.md`](rate-limiting.md) | Limits, headers, backoff |
+| [`webhooks.md`](webhooks.md) | Event subscriptions, signature verification, retries |
 
 ## Why this project
 
