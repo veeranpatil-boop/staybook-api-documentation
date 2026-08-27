@@ -27,7 +27,7 @@ theme:
     - search.highlight
 
 nav:
-  - Home: index.md
+  - Home: README.md
   - Getting Started: getting-started.md
   - Authentication: authentication.md
   - Pagination: pagination.md
