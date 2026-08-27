@@ -8,7 +8,7 @@ Sample API documentation portfolio project for a fictional hotel booking and res
 
 | Path | Contents |
 |---|---|
-| [`openapi.yaml`](../openapi/openapi.yaml) | Full OpenAPI 3.1 spec — 7 resources, two auth schemes, cursor pagination, structured errors |
+| [`openapi.yaml`](openapi.yaml) | Full OpenAPI 3.1 spec — 7 resources, two auth schemes, cursor pagination, structured errors |
 | [`getting-started.md`](getting-started.md) | First integration, start to finish |
 | [`authentication.md`](authentication.md) | API keys vs. OAuth2 client credentials |
 | [`pagination.md`](pagination.md) | Cursor-based pagination |
