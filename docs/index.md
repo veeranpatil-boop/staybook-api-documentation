@@ -1,4 +1,4 @@
-<img width="1407" height="607" alt="image" src="https://github.com/user-attachments/assets/a60d462a-f592-4a7e-a506-280d5ccf8a90" /># StayBook API Documentation
+# StayBook API Documentation
 
 Sample API documentation portfolio project for a fictional hotel booking and reservations API. The project includes end-to-end documentation, including an OpenAPI reference, conceptual guides, and an automated publishing pipeline.
 
