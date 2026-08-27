@@ -1,0 +1,728 @@
+openapi: 3.1.0
+info:
+  title: StayBook API
+  version: "1.0.0"
+  description: |
+    The StayBook API lets partners search property availability, create and manage
+    reservations, and receive real-time booking events via webhooks.
+
+    ## Base URL
+    All requests are made to `https://api.staybook.dev/v1`.
+
+    ## Conventions
+    - All timestamps are ISO 8601 UTC (e.g. `2026-09-14T15:00:00Z`).
+    - All monetary amounts are in the smallest currency unit (e.g. cents) alongside an ISO 4217 currency code.
+    - List endpoints are cursor-paginated. See [Pagination](../docs/pagination.md).
+    - Errors follow a single consistent shape. See [Errors](../docs/errors.md).
+  contact:
+    name: StayBook Developer Support
+    url: https://developers.staybook.dev
+    email: api-support@staybook.dev
+  license:
+    name: Portfolio sample — not for production use
+    url: https://developers.staybook.dev/license
+
+servers:
+  - url: https://api.staybook.dev/v1
+    description: Production
+  - url: https://sandbox.api.staybook.dev/v1
+    description: Sandbox (test data, no real charges)
+
+tags:
+  - name: Properties
+    description: Browse hotels/listings and their room types.
+  - name: Availability
+    description: Search open inventory for a date range.
+  - name: Reservations
+    description: Create and manage bookings.
+  - name: Guests
+    description: Guest profiles attached to reservations.
+  - name: Payments
+    description: Payment records associated with reservations.
+  - name: Webhooks
+    description: Subscribe to asynchronous booking events.
+
+security:
+  - ApiKeyAuth: []
+  - OAuth2ClientCredentials: [reservations:read, reservations:write]
+
+paths:
+  /properties:
+    get:
+      tags: [Properties]
+      summary: List properties
+      operationId: listProperties
+      parameters:
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: city
+          in: query
+          description: Filter by city name (case-insensitive exact match).
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A page of properties.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Property'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /properties/{propertyId}:
+    get:
+      tags: [Properties]
+      summary: Retrieve a property
+      operationId: getProperty
+      parameters:
+        - $ref: '#/components/parameters/PropertyIdPath'
+      responses:
+        '200':
+          description: The requested property.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /properties/{propertyId}/rooms:
+    get:
+      tags: [Properties]
+      summary: List room types for a property
+      operationId: listRooms
+      parameters:
+        - $ref: '#/components/parameters/PropertyIdPath'
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: A page of room types.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Room'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /availability:
+    get:
+      tags: [Availability]
+      summary: Search available rooms
+      description: |
+        Returns room types with open inventory for the given date range. This endpoint
+        does not hold or reserve inventory — availability can change between search and booking.
+      operationId: searchAvailability
+      parameters:
+        - name: propertyId
+          in: query
+          schema:
+            type: string
+        - name: checkIn
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: checkOut
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: guests
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+      responses:
+        '200':
+          description: Matching room availability.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AvailabilityResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /reservations:
+    get:
+      tags: [Reservations]
+      summary: List reservations
+      operationId: listReservations
+      parameters:
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ReservationStatus'
+      responses:
+        '200':
+          description: A page of reservations.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Reservation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Reservations]
+      summary: Create a reservation
+      description: |
+        Creates a reservation in `pending` status and attempts to hold inventory.
+        If a payment method is supplied, the API also attempts an authorization; on
+        success the reservation moves to `confirmed`.
+      operationId: createReservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReservationRequest'
+      responses:
+        '201':
+          description: Reservation created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Requested room is no longer available for the given dates.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /reservations/{reservationId}:
+    get:
+      tags: [Reservations]
+      summary: Retrieve a reservation
+      operationId: getReservation
+      parameters:
+        - $ref: '#/components/parameters/ReservationIdPath'
+      responses:
+        '200':
+          description: The requested reservation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Reservations]
+      summary: Modify a reservation
+      description: Change dates, room type, or guest count on a `pending` or `confirmed` reservation.
+      operationId: updateReservation
+      parameters:
+        - $ref: '#/components/parameters/ReservationIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReservationRequest'
+      responses:
+        '200':
+          description: Updated reservation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '409':
+          description: Reservation cannot be modified in its current status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /reservations/{reservationId}/cancel:
+    post:
+      tags: [Reservations]
+      summary: Cancel a reservation
+      operationId: cancelReservation
+      parameters:
+        - $ref: '#/components/parameters/ReservationIdPath'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Reservation cancelled. Refund eligibility depends on the property's cancellation policy.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '409':
+          description: Reservation is already cancelled or completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /guests:
+    post:
+      tags: [Guests]
+      summary: Create a guest profile
+      operationId: createGuest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGuestRequest'
+      responses:
+        '201':
+          description: Guest created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Guest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /guests/{guestId}:
+    get:
+      tags: [Guests]
+      summary: Retrieve a guest
+      operationId: getGuest
+      parameters:
+        - name: guestId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The requested guest.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Guest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /payments/{paymentId}:
+    get:
+      tags: [Payments]
+      summary: Retrieve a payment
+      operationId: getPayment
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The requested payment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /webhooks:
+    get:
+      tags: [Webhooks]
+      summary: List webhook subscriptions
+      operationId: listWebhooks
+      responses:
+        '200':
+          description: A list of webhook subscriptions.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Webhook'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Webhooks]
+      summary: Create a webhook subscription
+      operationId: createWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhookRequest'
+      responses:
+        '201':
+          description: Webhook subscription created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /webhooks/{webhookId}:
+    delete:
+      tags: [Webhooks]
+      summary: Delete a webhook subscription
+      operationId: deleteWebhook
+      parameters:
+        - name: webhookId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Webhook subscription deleted.
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Server-to-server key, issued per environment (production/sandbox). See [Authentication](../docs/authentication.md).
+    OAuth2ClientCredentials:
+      type: oauth2
+      description: For partner applications acting on behalf of multiple properties.
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.staybook.dev/oauth/token
+          scopes:
+            reservations:read: Read reservation data
+            reservations:write: Create and modify reservations
+
+  parameters:
+    CursorParam:
+      name: cursor
+      in: query
+      description: Opaque cursor from a previous response's `next_cursor`. Omit for the first page.
+      schema:
+        type: string
+    LimitParam:
+      name: limit
+      in: query
+      description: Number of items to return (1-100).
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    PropertyIdPath:
+      name: propertyId
+      in: path
+      required: true
+      schema:
+        type: string
+    ReservationIdPath:
+      name: reservationId
+      in: path
+      required: true
+      schema:
+        type: string
+
+  responses:
+    BadRequest:
+      description: The request was malformed or failed validation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Missing or invalid credentials.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: The requested resource does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    RateLimited:
+      description: Too many requests. See `X-RateLimit-*` response headers.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    PaginatedResponse:
+      type: object
+      properties:
+        next_cursor:
+          type: [string, "null"]
+          description: Pass as `cursor` to fetch the next page. `null` when there are no more results.
+
+    Property:
+      type: object
+      properties:
+        id:
+          type: string
+          example: prop_9f8a2c
+        name:
+          type: string
+          example: Harbor View Suites
+        city:
+          type: string
+          example: Lisbon
+        country:
+          type: string
+          example: PT
+        star_rating:
+          type: number
+          minimum: 1
+          maximum: 5
+        cancellation_policy:
+          type: string
+          enum: [flexible, moderate, strict]
+
+    Room:
+      type: object
+      properties:
+        id:
+          type: string
+          example: room_44b1
+        property_id:
+          type: string
+        name:
+          type: string
+          example: Deluxe King
+        max_guests:
+          type: integer
+        base_price:
+          $ref: '#/components/schemas/Money'
+
+    AvailabilityResult:
+      type: object
+      properties:
+        room:
+          $ref: '#/components/schemas/Room'
+        nights:
+          type: integer
+        total_price:
+          $ref: '#/components/schemas/Money'
+        units_remaining:
+          type: integer
+
+    ReservationStatus:
+      type: string
+      enum: [pending, confirmed, cancelled, completed]
+
+    Reservation:
+      type: object
+      properties:
+        id:
+          type: string
+          example: res_7c21ad
+        status:
+          $ref: '#/components/schemas/ReservationStatus'
+        property_id:
+          type: string
+        room_id:
+          type: string
+        guest_id:
+          type: string
+        check_in:
+          type: string
+          format: date
+        check_out:
+          type: string
+          format: date
+        guests:
+          type: integer
+        total_price:
+          $ref: '#/components/schemas/Money'
+        payment_id:
+          type: [string, "null"]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateReservationRequest:
+      type: object
+      required: [room_id, guest_id, check_in, check_out, guests]
+      properties:
+        room_id:
+          type: string
+        guest_id:
+          type: string
+        check_in:
+          type: string
+          format: date
+        check_out:
+          type: string
+          format: date
+        guests:
+          type: integer
+          minimum: 1
+        payment_method_id:
+          type: string
+          description: Optional. If omitted, the reservation is created as `pending` and must be confirmed separately.
+
+    UpdateReservationRequest:
+      type: object
+      properties:
+        check_in:
+          type: string
+          format: date
+        check_out:
+          type: string
+          format: date
+        guests:
+          type: integer
+          minimum: 1
+
+    Guest:
+      type: object
+      properties:
+        id:
+          type: string
+          example: guest_1a2b3c
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+
+    CreateGuestRequest:
+      type: object
+      required: [full_name, email]
+      properties:
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+          example: pay_5d6e7f
+        reservation_id:
+          type: string
+        amount:
+          $ref: '#/components/schemas/Money'
+        status:
+          type: string
+          enum: [authorized, captured, refunded, failed]
+        created_at:
+          type: string
+          format: date-time
+
+    Money:
+      type: object
+      properties:
+        amount:
+          type: integer
+          description: Amount in the smallest unit of the currency (e.g. cents).
+          example: 24500
+        currency:
+          type: string
+          example: EUR
+
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+            enum:
+              - reservation.created
+              - reservation.confirmed
+              - reservation.cancelled
+              - payment.captured
+              - payment.failed
+        created_at:
+          type: string
+          format: date-time
+
+    CreateWebhookRequest:
+      type: object
+      required: [url, events]
+      properties:
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: room_unavailable
+            message:
+              type: string
+              example: The requested room has no availability for the given dates.
+            details:
+              type: [object, "null"]
