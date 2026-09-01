@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://veeranpatil-boop.github.io/staybook-api-documentation/</loc>
+         <lastmod>2026-09-01</lastmod>
+    </url>
+    <url>
+         <loc>https://veeranpatil-boop.github.io/staybook-api-documentation/Rating/</loc>
+         <lastmod>2026-09-01</lastmod>
+    </url>
+    <url>
+         <loc>https://veeranpatil-boop.github.io/staybook-api-documentation/authentication/</loc>
+         <lastmod>2026-09-01</lastmod>
+    </url>
+    <url>
+         <loc>https://veeranpatil-boop.github.io/staybook-api-documentation/errors/</loc>
+         <lastmod>2026-09-01</lastmod>
+    </url>
+    <url>
+         <loc>https://veeranpatil-boop.github.io/staybook-api-documentation/getting-started/</loc>
+         <lastmod>2026-09-01</lastmod>
+    </url>
+    <url>
+         <loc>https://veeranpatil-boop.github.io/staybook-api-documentation/pagination/</loc>
+         <lastmod>2026-09-01</lastmod>
+    </url>
+    <url>
+         <loc>https://veeranpatil-boop.github.io/staybook-api-documentation/rate-limiting/</loc>
+         <lastmod>2026-09-01</lastmod>
+    </url>
+    <url>
+         <loc>https://veeranpatil-boop.github.io/staybook-api-documentation/webhooks/</loc>
+         <lastmod>2026-09-01</lastmod>
+    </url>
+</urlset>
