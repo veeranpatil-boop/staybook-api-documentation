@@ -34,6 +34,7 @@ nav:
   - Rate Limiting: rate-limiting.md
   - Errors: errors.md
   - Webhooks: webhooks.md
+  - Rating: Rating.md
 
 markdown_extensions:
   - admonition
