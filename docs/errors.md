@@ -1,4 +1,4 @@
-# Errors
+# Errors Management
 
 Every error response has the same shape:
 
