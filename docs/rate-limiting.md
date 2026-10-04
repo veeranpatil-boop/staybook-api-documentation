@@ -2,7 +2,7 @@
 
 API keys are limited to **300 requests per minute**, tracked in a rolling window
 per key. OAuth2 partner tokens are limited per `client_id` at a higher default of
-**1,200 requests per minute** — contact support if your integration needs more.
+**1,200 requests per minute** — contact our support team if your integration needs more.
 
 ## Response headers
 
