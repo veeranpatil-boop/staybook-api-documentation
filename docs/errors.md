@@ -41,6 +41,7 @@ Every error response has the same shape:
 | `already_cancelled` | 409 | The reservation is already cancelled or completed. |
 
 ## Retrying safely
+*Note*: Check for idempotency
 
 `POST /reservations` is not automatically idempotent — retrying a timed-out request
 can create a duplicate reservation. If you need to retry a create request safely,
