@@ -1,6 +1,6 @@
 # Authentication
 
-StayBook provides two authentication methods. The one you use depends on what you are building.
+StayBook offers two authentication methods. The one you use depends on what you are building.
 
 | Method | Use when | Header/flow |
 |---|---|---|
